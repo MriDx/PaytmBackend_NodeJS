@@ -1,13 +1,19 @@
 const http = require('http');
 const https = require('https');
 const qs = require('querystring');
-const port = 8080;
+const port = 8081;
 const checksum_lib = require('./checksum.js');
 
 var PaytmConfig = {
-	mid: "XXXXXXXXXXXXXXXXXXXX",
-	key: "XXXXXXXXXXXXXXXX",
-	website: "XXXXXXXXXX"
+	mid: "YgtqSS65538729777928",
+	key: "OreJjEi9wUle3SbZ",
+	website: "DEFAULT"
+}
+
+var PaytmConfigTest = {
+	mid: "EzQWfn65020607388331",
+	key: "y4w9IIv#TtMIhs3a",
+	website: "WEBSTAGGING"
 }
 
 
@@ -31,7 +37,7 @@ http.createServer(function (req, res) {
 
 				var txn_url = "https://securegw-stage.paytm.in/theia/processTransaction"; // for staging
 				// var txn_url = "https://securegw.paytm.in/theia/processTransaction"; // for production
-				
+
 				var form_fields = "";
 				for(var x in params){
 					form_fields += "<input type='hidden' name='"+x+"' value='"+params[x]+"' >";
@@ -43,11 +49,11 @@ http.createServer(function (req, res) {
 				res.end();
 			});
 		break;
-	
+
 		case "/callback":
 
 			var body = '';
-	        
+
 	        req.on('data', function (data) {
 	            body += data;
 	        });
@@ -124,9 +130,107 @@ http.createServer(function (req, res) {
 					post_req.end();
 				});
 	        });
-			
+
 		break;
+
+		case "/gen/test":
+
+			var body = '';
+
+	        req.on('data', function (data) {
+	            body += data;
+			});
+
+			req.on('end', function () {
+				var html = "";
+				var post_data = qs.parse(body);
+
+				var m = JSON.parse(body)
+				console.log(m.phone)
+
+				//console.log(post_data)
+
+				var oId = 'ORDER_P_'  + new Date().getTime();
+				var callbackURL = 'https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID='+ oId
+
+				var params 						= {};
+				params['MID'] 					= PaytmConfigTest.mid;
+				params['WEBSITE']				= PaytmConfigTest.website;
+				params['CHANNEL_ID']			= 'WAP';
+				params['INDUSTRY_TYPE_ID']	= 'Retail';
+				params['ORDER_ID']			= oId;
+				params['CUST_ID'] 			= m.customerId;
+				params['TXN_AMOUNT']			= m.amount;
+				params['CALLBACK_URL']		=callbackURL;
+				params['EMAIL']				= m.email;
+				params['MOBILE_NO']			= m.phone;
+
+				console.log(params)
+				console.log(oId)
+				console.log(callbackURL)
+
+				checksum_lib.genchecksum(params, PaytmConfigTest.key, function (err, checksum) {
+					res.writeHead(200, {'Content-Type': 'application/json'})
+					if (err != null) {
+						res.write(JSON.stringify({error: err}))
+						res.end()
+					} else {
+						res.write(JSON.stringify({checksum : checksum, params}))
+						res.end()
+					}
+				});
+			});
+			break;
+
+			case "/gen":
+
+			var body = '';
+
+	        req.on('data', function (data) {
+	            body += data;
+			});
+
+			req.on('end', function () {
+				var html = "";
+				var post_data = qs.parse(body);
+
+				var m = JSON.parse(body)
+				console.log(m.phone)
+
+				//console.log(post_data)
+
+				var oId = 'ORDER_P_'  + new Date().getTime();
+				var callbackURL = 'https://securegw.paytm.in/theia/paytmCallback?ORDER_ID='+ oId
+
+				var params 						= {};
+				params['MID'] 					= PaytmConfig.mid;
+				params['WEBSITE']				= PaytmConfig.website;
+				params['CHANNEL_ID']			= 'WAP';
+				params['INDUSTRY_TYPE_ID']	= 'Retail';
+				params['ORDER_ID']			= oId;
+				params['CUST_ID'] 			= m.customerId;
+				params['TXN_AMOUNT']			= m.amount;
+				params['CALLBACK_URL']		=callbackURL;
+				params['EMAIL']				= m.email;
+				params['MOBILE_NO']			= m.phone;
+
+				console.log(params)
+				console.log(oId)
+				console.log(callbackURL)
+
+				checksum_lib.genchecksum(params, PaytmConfig.key, function (err, checksum) {
+					res.writeHead(200, {'Content-Type': 'application/json'})
+					if (err != null) {
+						res.write(JSON.stringify({error: err}))
+						res.end()
+					} else {
+						res.write(JSON.stringify({checksum : checksum, params}))
+						res.end()
+					}
+				});
+			});
+			break;
 	}
-	
+
 
 }).listen(port);
