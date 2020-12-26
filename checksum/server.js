@@ -22,8 +22,8 @@ http.createServer(function (req, res) {
 	switch(req.url){
 		case "/":
 			var params 						= {};
-			params['MID'] 					= PaytmConfig.mid;
-			params['WEBSITE']				= PaytmConfig.website;
+			params['MID'] 					= PaytmConfigTest.mid;
+			params['WEBSITE']				= PaytmConfigTestg.website;
 			params['CHANNEL_ID']			= 'WEB';
 			params['INDUSTRY_TYPE_ID']	= 'Retail';
 			params['ORDER_ID']			= 'TEST_'  + new Date().getTime();
@@ -33,7 +33,7 @@ http.createServer(function (req, res) {
 			params['EMAIL']				= 'abc@mailinator.com';
 			params['MOBILE_NO']			= '7777777777';
 
-			checksum_lib.genchecksum(params, PaytmConfig.key, function (err, checksum) {
+			checksum_lib.genchecksum(params, PaytmConfigTest.key, function (err, checksum) {
 
 				var txn_url = "https://securegw-stage.paytm.in/theia/processTransaction"; // for staging
 				// var txn_url = "https://securegw.paytm.in/theia/processTransaction"; // for production
